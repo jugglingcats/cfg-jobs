@@ -47,16 +47,16 @@ def send_email(jobs):
         server.sendmail(EMAIL_ADDRESS, EMAIL_ADDRESS, msg.as_string())
 
 def main():
-    if not EMAIL_ADDRESS or not EMAIL_USER or not EMAIL_PASSWORD:
-        logging.error("Required environment variables are not set.")
-        return
-
     latest_jobs = fetch_jobs()
     cached_jobs = load_cached_jobs()
 
     if latest_jobs != cached_jobs:
-        logging.info("New job listings found. Sending email...")
-        send_email(latest_jobs)
+        logging.info("New job listings found.")
+        if EMAIL_ADDRESS and EMAIL_USER and EMAIL_PASSWORD:
+            logging.info("Sending email...")
+            send_email(latest_jobs)
+        else:
+            logging.error("Cowardly refusing to send email because the necessary environment variables are not set")
         save_jobs_to_cache(latest_jobs)
     else:
         logging.info("No new job listings found.")
