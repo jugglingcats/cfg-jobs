@@ -34,14 +34,19 @@ To run the script locally, follow these steps:
     pip install -r requirements.txt
     ```
 
-4. Set the required environment variables:
+4. Install Playwright:
+    ```sh
+    playwright install
+    ```
+
+5. Set the required environment variables:
     ```sh
     export EMAIL_ADDRESS='your_email@example.com'
     export EMAIL_USER='your_email_username'
     export EMAIL_PASSWORD='your_email_password'
     ```
 
-5. Run the script:
+6. Run the script:
     ```sh
     python main.py
     ```

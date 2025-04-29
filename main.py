@@ -3,6 +3,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from playwright.sync_api import sync_playwright
+import logging
 
 CACHE_FILE = 'job_list_cache/jobs.txt'
 EMAIL_ADDRESS = os.getenv('EMAIL_ADDRESS')
@@ -10,6 +11,7 @@ EMAIL_USER = os.getenv('EMAIL_USER')
 EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
 
 def fetch_jobs():
+    logging.info("Fetching job listings from the website...")
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page()
@@ -17,6 +19,7 @@ def fetch_jobs():
         job_elements = page.query_selector_all('.job-row')
         jobs = [job.inner_text() for job in job_elements]
         browser.close()
+    logging.info(f"Fetched {len(jobs)} job listings.")
     return jobs
 
 def load_cached_jobs():
@@ -44,12 +47,20 @@ def send_email(jobs):
         server.sendmail(EMAIL_ADDRESS, EMAIL_ADDRESS, msg.as_string())
 
 def main():
+    if not EMAIL_ADDRESS or not EMAIL_USER or not EMAIL_PASSWORD:
+        logging.error("Required environment variables are not set.")
+        return
+
     latest_jobs = fetch_jobs()
     cached_jobs = load_cached_jobs()
 
     if latest_jobs != cached_jobs:
+        logging.info("New job listings found. Sending email...")
         send_email(latest_jobs)
         save_jobs_to_cache(latest_jobs)
+    else:
+        logging.info("No new job listings found.")
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     main()
