@@ -25,13 +25,13 @@ def fetch_jobs():
 def load_cached_jobs():
     if os.path.exists(CACHE_FILE):
         with open(CACHE_FILE, 'r') as f:
-            return f.read().splitlines()
-    return []
+            return f.read()
+    return ""
 
-def save_jobs_to_cache(jobs):
+def save_jobs_to_cache(latest_jobs_str):
     os.makedirs(os.path.dirname(CACHE_FILE), exist_ok=True)
     with open(CACHE_FILE, 'w') as f:
-        f.write('\n'.join(jobs))
+        f.write(latest_jobs_str)
 
 def send_email(jobs):
     msg = MIMEMultipart()
@@ -48,17 +48,16 @@ def send_email(jobs):
 
 def main():
     latest_jobs = fetch_jobs()
+    latest_jobs_str = '\n'.join(latest_jobs)
     cached_jobs = load_cached_jobs()
-    print("Cached job count", len(cached_jobs))
-
-    if latest_jobs != cached_jobs:
+    if latest_jobs_str != cached_jobs:
         logging.info("New job listings found.")
         if EMAIL_ADDRESS and EMAIL_USER and EMAIL_PASSWORD:
             logging.info("Sending email...")
             send_email(latest_jobs)
         else:
             logging.error("Cowardly refusing to send email because the necessary environment variables are not set")
-        save_jobs_to_cache(latest_jobs)
+        save_jobs_to_cache(latest_jobs_str)
     else:
         logging.info("No new job listings found.")
 
