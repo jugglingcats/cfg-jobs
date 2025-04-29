@@ -49,6 +49,7 @@ def send_email(jobs):
 def main():
     latest_jobs = fetch_jobs()
     cached_jobs = load_cached_jobs()
+    print("Cached job count", len(cached_jobs))
 
     if latest_jobs != cached_jobs:
         logging.info("New job listings found.")
